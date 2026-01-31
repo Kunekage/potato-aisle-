@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🥔 Potato Aisle</title>
+
+<!-- Social Share Preview -->
+<meta property="og:title" content="Potato Aisle 🥔" />
+<meta property="og:description" content="Legendary Potato Restaurant – Serious potatoes. Serious flavor." />
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/a/ab/Patates.jpg" />
+<meta property="og:type" content="website" />
+
+<style>
+:root{--accent:#c97c2b;--bg:#fff8ee;--dark:#1e1e1e}
+body{margin:0;font-family:Segoe UI,sans-serif;background:var(--bg);color:#333;transition:.3s}
+body.dark{background:var(--dark);color:#f5f5f5}
+header{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:var(--accent);color:white}
+nav button{margin-left:.5rem;border:none;background:white;color:#333;padding:.4rem .8rem;border-radius:12px;cursor:pointer}
+section{padding:3rem 1.5rem;text-align:center}
+.hero{animation:fade 1.2s}
+.menu{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem}
+.card{background:white;padding:1.2rem;border-radius:18px;box-shadow:0 10px 20px rgba(0,0,0,.1);transition:.3s}
+.card:hover{transform:translateY(-6px)}
+button.main{background:var(--accent);color:white;border:none;padding:.6rem 1.2rem;border-radius:20px;cursor:pointer}
+/* removed hidden class to avoid blank page on restricted hosts */
+.mascot{width:120px;animation:bounce 1.5s infinite}
+footer{text-align:center;padding:1rem;font-size:.9rem}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@media(max-width:600px){header{flex-direction:column;gap:.5rem}}
+</style>
+</head>
+<body>
+<noscript style="padding:1rem;display:block;text-align:center">⚠️ JavaScript is required to view Potato Aisle.</noscript>
+<header>
+<h1>🥔 Potato Aisle</h1>
+<nav>
+<button onclick="show('home')">Home</button>
+<button onclick="show('menu')">Menu</button>
+<button onclick="show('checkout')">Cart (<span id="count">0</span>)</button>
+<button onclick="toggleDark()">🌙</button>
+</nav>
+</header>
+
+<section id="home" class="hero">
+<img src="https://upload.wikimedia.org/wikipedia/commons/a/ab/Patates.jpg" class="mascot" alt="potato">
+<h2>Legendary Potato Restaurant</h2>
+<p>Serious potatoes. Serious flavor.</p>
+<button class="main" onclick="show('menu')">Order Now</button>
+<br><br>
+<button class="main" onclick="shareFacebook()">Share on Facebook</button>
+<button class="main" onclick="shareMessenger()">Share on Messenger</button>
+<button class="main" onclick="shareWhatsApp()">Share on WhatsApp</button>
+<button class="main" onclick="copyLink()">Copy Link</button>
+<div id="copyMsg"></div>
+</section>
+
+<section id="menu" style="display:none">
+<h2>Menu</h2>
+<div class="menu">
+<div class="card"><h3>Golden Fries</h3><p>$4</p><button class="main" onclick="add('Fries',4)">Add</button></div>
+<div class="card"><h3>Baked Potato</h3><p>$6</p><button class="main" onclick="add('Baked',6)">Add</button></div>
+<div class="card"><h3>Mashed Supreme</h3><p>$5</p><button class="main" onclick="add('Mashed',5)">Add</button></div>
+</div>
+<p>Jacob Suggests: Try the Baked Potato!</p>
+</section>
+
+<section id="checkout" style="display:none">
+<h2>Checkout</h2>
+<ul id="items"></ul>
+<h3>Total: $<span id="total">0</span></h3>
+<button class="main" onclick="order()">Place Order</button>
+</section>
+
+<footer>© 2026 Potato Aisle 🥔</footer>
+
+<script>
+// ================= Core App Logic =================
+let cart = [];
+let total = 0;
+
+function show(id){
+  document.querySelectorAll('section').forEach(s=>s.style.display='none');
+  const el = document.getElementById(id);
+  if(el) el.style.display='block';
+}
+
+function add(item, price){
+  cart.push(item);
+  total += price;
+  document.getElementById('count').textContent = cart.length;
+}
+
+function order(){
+  const itemsEl = document.getElementById('items');
+  itemsEl.innerHTML = cart.map(i => `<li>${i}</li>`).join('');
+  document.getElementById('total').textContent = total;
+  alert('🥔 Order placed!');
+}
+
+function toggleDark(){
+  document.body.classList.toggle('dark');
+}
+
+// ================= Share Functions =================
+function shareFacebook(){
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+}
+
+function shareMessenger(){
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://www.facebook.com/dialog/send?link=${url}&app_id=123456789&redirect_uri=${url}`, '_blank');
+}
+
+function shareWhatsApp(){
+  const url = encodeURIComponent(window.location.href);
+  window.open(`https://wa.me/?text=${url}`, '_blank');
+}
+
+// ================= Clipboard-Safe Copy =================
+function copyLink(){
+  const text = window.location.href;
+  const msg = document.getElementById('copyMsg');
+
+  // Preferred API (may be blocked in sandboxed environments)
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(text)
+      .then(() => msg.textContent = '✅ Link copied!')
+      .catch(() => fallbackCopy(text, msg));
+  } else {
+    fallbackCopy(text, msg);
+  }
+}
+
+function fallbackCopy(text, msg){
+  const textarea = document.createElement('textarea');
+  textarea.value = text;
+  textarea.setAttribute('readonly', '');
+  textarea.style.position = 'absolute';
+  textarea.style.left = '-9999px';
+  document.body.appendChild(textarea);
+  textarea.select();
+  try {
+    document.execCommand('copy');
+    msg.textContent = '✅ Link copied!';
+  } catch (err) {
+    msg.textContent = '❌ Copy not allowed in this environment';
+  }
+  document.body.removeChild(textarea);
+}
+
+// ================= Runtime Tests =================
+console.assert(typeof shareFacebook === 'function', 'shareFacebook should be defined');
+console.assert(typeof shareMessenger === 'function', 'shareMessenger should be defined');
+console.assert(typeof shareWhatsApp === 'function', 'shareWhatsApp should be defined');
+console.assert(typeof copyLink === 'function', 'copyLink should be defined');
+console.assert(typeof fallbackCopy === 'function', 'fallbackCopy should be defined');
+console.assert(Array.isArray(cart), 'cart should be an array');
+// ================= Init Fix =================
+// Always show home by default (no JS/CSS race conditions)
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('section').forEach(s=>s.style.display='none');
+  const home = document.getElementById('home');
+  if(home) home.style.display='block';
+});
+// Ensure Home is visible even if CSS/JS execution order fails
+document.addEventListener('DOMContentLoaded', () => {
+  const home = document.getElementById('home');
+  if (home) {
+    document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'));
+    home.classList.remove('hidden');
+  }
+});
+
+</script>
+</body>
+</html>
+  
